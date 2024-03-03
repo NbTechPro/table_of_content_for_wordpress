@@ -1,0 +1,144 @@
+html on single post php
+
+<?php
+// Other PHP code for fetching header, footer, etc.
+
+// Start of the loop
+while (have_posts()) : the_post();
+
+// Place the PHP code here
+if (is_single()) : ?>
+    <div id="toc-button">Table of Contents</div>
+    <div id="toc-container">
+        <button id="close-toc">Close</button>
+        <h1><?php the_title(); ?></h1>
+        <ul>
+            <?php 
+                // Code to generate table of contents dynamically based on headings in the post
+                $content = get_the_content();
+                $pattern = '/<h([2-6]).*?>(.*?)<\/h\1>/';
+                preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
+                foreach ($matches as $match) {
+                    $heading_level = $match[1];
+                    $heading_text = $match[2];
+                    $heading_slug = sanitize_title($heading_text);
+                    echo '<li><a href="#toc-heading-' . $heading_slug . '">' . $heading_text . '</a></li>';
+                    // Replace the original heading with the heading containing the anchor link
+                    $content = str_replace($match[0], '<h' . $heading_level . ' id="toc-heading-' . $heading_slug . '">' . $heading_text . '</h' . $heading_level . '>', $content);
+                }
+            ?>
+        </ul>
+    </div>
+<?php endif; ?>
+
+<!-- The rest of your single post template code goes here -->
+
+<?php endwhile; ?>
+
+
+
+
+
+Css on customize css
+
+#toc-button {
+  position: fixed;
+  top: 50%;
+  left: -40px; /* Adjust as needed */
+  transform: translateY(-50%) rotate(-90deg); /* Rotate label vertically */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  z-index: 9999;
+  transition: left 0.3s ease; /* Smooth transition when appearing from left */
+  border-radius: 20px; /* Squircle shape */
+  font-family: "italic", sans-serif; /* Change the font family as needed */
+  /* Other styling properties for the button */
+}
+
+#toc-container {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background-color: #f0f0f0; /* Light gray color for the container */
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: none;
+  z-index: 9999;
+  width: 300px; /* Adjust the width as needed */
+  border-radius: 20px; /* Apply squircles border-radius */
+}
+
+#toc-container ul {
+  list-style-type: none; /* Remove default bullets */
+  padding: 0;
+  margin: 0; /* Add margin to control the list position */
+}
+
+#toc-container ul li {
+   color: #333; /* Change the font color as needed */
+	font-style: italic; /* Set the font style of the table of contents item to italic */
+  margin-bottom: 5px;
+  padding-left: 20px; /* Add padding to accommodate the bullets */
+  position: relative; /* Make the li items relatively positioned */
+}
+
+#toc-container ul li::before {
+  content: '\2022'; /* Add bullet character */
+  position: absolute;
+  left: 0;
+}
+
+
+#close-toc {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+#toc-container h1 {
+  font-style: italic; /* Set the font style of the post title to italic */
+  font-size: 16px; /* Adjust the font size as needed */
+  margin-bottom: 10px; /* Add some bottom margin for separation */
+  color: #333; /* Change the font color as needed */
+}
+
+
+
+
+
+
+js on wp code
+
+jQuery(document).ready(function($) {
+  $('#toc-button').click(function() {
+    $(this).fadeOut('slow'); // Hide the table of contents button
+    $('#toc-container').css({'display': 'block', 'left': '-300px', 'opacity': 0}).animate({left: '10px', opacity: 1}, 'slow'); // Show and animate the table of contents container from the left with opacity animation
+  });
+
+  // Hide the table of contents box when clicking on other areas of the website
+  $(document).on('click', function(event) {
+    if (!$(event.target).closest('#toc-button, #toc-container').length) {
+      $('#toc-container').hide();
+      $('#toc-button').fadeIn('slow'); // Show the table of contents button
+    }
+  });
+
+  // Close the table of contents box when clicking on the close button
+  $('#close-toc').click(function() {
+    $('#toc-container').hide();
+    $('#toc-button').fadeIn('slow'); // Show the table of contents button
+  });
+
+  // Hide the table of contents box and show the button when clicking on a table of contents item
+  $('#toc-container a').click(function() {
+    $('#toc-container').hide();
+    $('#toc-button').fadeIn('slow'); // Show the table of contents button
+  });
+});
+
